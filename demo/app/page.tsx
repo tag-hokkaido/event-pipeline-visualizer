@@ -293,6 +293,93 @@ export default function Home() {
     }, 3000)
   }
 
+  const handleFailureDemo = () => {
+    const visualizer = visualizerRef.current
+    if (!visualizer) return
+
+    // Step 1: Start with success
+    visualizer.startEvent("init-failure-demo", {
+      name: "Initialize Failure Demo",
+      type: "file-operation",
+      pipelineId: "failure-demo",
+    })
+
+    setTimeout(() => visualizer.updateProgress("init-failure-demo", 100, "Initialization complete"), 500)
+    setTimeout(() => visualizer.completeEvent("init-failure-demo", true), 500)
+
+    // Step 2: First step succeeds
+    setTimeout(() => {
+      visualizer.startEvent("step-1", {
+        name: "Step 1 - Success",
+        type: "data-processing",
+        pipelineId: "failure-demo",
+        parentId: "init-failure-demo",
+      })
+
+      setTimeout(() => visualizer.updateProgress("step-1", 50, "Processing..."), 300)
+      setTimeout(() => visualizer.updateProgress("step-1", 100, "Step 1 completed"), 800)
+      setTimeout(() => visualizer.completeEvent("step-1", true), 800)
+    }, 500)
+
+    // Step 3: Second step fails
+    setTimeout(() => {
+      visualizer.startEvent("step-2", {
+        name: "Step 2 - Failure",
+        type: "api-call",
+        pipelineId: "failure-demo",
+        parentId: "step-1",
+      })
+
+      setTimeout(() => visualizer.updateProgress("step-2", 30, "Connecting to API..."), 300)
+      setTimeout(() => visualizer.updateProgress("step-2", 60, "Request sent..."), 600)
+      setTimeout(() => visualizer.updateProgress("step-2", 80, "Timeout occurred"), 900)
+      setTimeout(() => visualizer.completeEvent("step-2", false, "API timeout: Connection failed after 30 seconds"), 900)
+    }, 1300)
+
+    // Step 4: Retry attempt (also fails)
+    setTimeout(() => {
+      visualizer.startEvent("step-2-retry", {
+        name: "Step 2 - Retry (Failed)",
+        type: "api-call",
+        pipelineId: "failure-demo",
+        parentId: "step-1",
+      })
+
+      setTimeout(() => visualizer.updateProgress("step-2-retry", 20, "Retrying connection..."), 200)
+      setTimeout(() => visualizer.updateProgress("step-2-retry", 40, "Authentication failed"), 400)
+      setTimeout(() => visualizer.completeEvent("step-2-retry", false, "Authentication error: Invalid credentials"), 400)
+    }, 1800)
+
+    // Step 5: Alternative path (succeeds)
+    setTimeout(() => {
+      visualizer.startEvent("step-2-alternative", {
+        name: "Step 2 - Alternative Path",
+        type: "database",
+        pipelineId: "failure-demo",
+        parentId: "step-1",
+      })
+
+      setTimeout(() => visualizer.updateProgress("step-2-alternative", 50, "Using fallback database..."), 300)
+      setTimeout(() => visualizer.updateProgress("step-2-alternative", 100, "Alternative path successful"), 800)
+      setTimeout(() => visualizer.completeEvent("step-2-alternative", true), 800)
+    }, 2300)
+
+    // Step 6: Final step (succeeds despite previous failures)
+    setTimeout(() => {
+      visualizer.startEvent("step-3", {
+        name: "Step 3 - Final Processing",
+        type: "data-processing",
+        pipelineId: "failure-demo",
+        parentId: "step-2-alternative",
+      })
+
+      setTimeout(() => visualizer.updateProgress("step-3", 40, "Processing with partial data..."), 400)
+      setTimeout(() => visualizer.updateProgress("step-3", 80, "Generating report..."), 800)
+      setTimeout(() => visualizer.updateProgress("step-3", 100, "Pipeline completed with warnings"), 1200)
+      setTimeout(() => visualizer.completeEvent("step-3", true), 1200)
+    }, 3200)
+  }
+
   const handleClear = () => {
     visualizerRef.current?.clear()
   }
@@ -322,6 +409,9 @@ export default function Home() {
                 </Button>
                 <Button onClick={handleParallelDemo} className="w-full">
                   Run Parallel Demo
+                </Button>
+                <Button onClick={handleFailureDemo} className="w-full">
+                  Run Failure Demo
                 </Button>
                 <Button onClick={handleClear} className="w-full" variant="outline">
                   Clear

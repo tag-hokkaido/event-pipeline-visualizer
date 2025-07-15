@@ -5,20 +5,8 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  Play,
   AlertTriangle,
-  FileText,
-  Database,
-  Globe,
-  Server,
-  Bell,
 } from "lucide-react";
-import type {
-  SimpleEventInstance,
-  SimpleVisualizerConfig,
-  EventTypeDefinition,
-  NodeStyleDefinition,
-} from "../core/SimpleEventVisualizer";
 import { SimpleEventNodeData } from "./nodeTypes";
 
 // アイコンマッピングは不要になりました
@@ -147,12 +135,14 @@ export const SimpleEventNode = memo(
 
         {/* Error Message */}
         {event.status === "failed" && event.error && (
-          <div className="text-sm text-red-700 mb-4 bg-red-100 px-3 py-2 rounded-lg border border-red-300">
+          <div className="text-sm text-red-800 mb-3 bg-red-50 px-3 py-2 rounded-lg border border-red-300">
             <div className="flex items-center gap-2 mb-1">
               <AlertTriangle className="w-4 h-4 text-red-600" />
-              <span className="font-semibold">Error</span>
+              <span className="font-semibold text-red-700 text-sm">Error</span>
             </div>
-            {event.error}
+            <div className="text-red-700 text-sm">
+              {event.error}
+            </div>
           </div>
         )}
 
