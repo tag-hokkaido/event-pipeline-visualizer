@@ -119,9 +119,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!visualizerRef.current) {
-      visualizerRef.current = new SimpleEventVisualizer({
-        eventTypeConfig: customEventTypes
-      })
+      visualizerRef.current = new SimpleEventVisualizer(customEventTypes)
       
       visualizerRef.current.onUpdate((events: SimpleEventInstance[]) => {
         setEvents(events)
@@ -347,7 +345,7 @@ export default function Home() {
                   <SimpleVisualizerComponent 
                     events={events}
                     config={visualizerConfig}
-                    onEventUpdate={() => {}}
+                    eventTypeConfig={customEventTypes}
                   />
                 </div>
               </CardContent>

@@ -19,69 +19,21 @@ import type {
   EventTypeDefinition,
   NodeStyleDefinition,
 } from "../core/SimpleEventVisualizer";
+import { SimpleEventNodeData } from "./nodeTypes";
 
-interface SimpleEventNodeData {
-  event: SimpleEventInstance;
-  config: SimpleVisualizerConfig;
-  eventTypeDefinition?: EventTypeDefinition;
-  nodeStyleDefinition?: NodeStyleDefinition;
-}
-
-// アイコンマッピング
-const ICON_MAP: Record<string, any> = {
-  FileText,
-  Database,
-  Globe,
-  Server,
-  Bell,
-  Clock,
-  Play,
-  AlertTriangle,
-};
+// アイコンマッピングは不要になりました
 
 export const SimpleEventNode = memo(
   ({ data }: NodeProps<SimpleEventNodeData>) => {
-    const { event, eventTypeDefinition, nodeStyleDefinition } = data;
+    const { event, eventTypeDefinition } = data;
 
-    // イベントタイプ定義を取得（フォールバック付き）
-    const getEventTypeDef = (): EventTypeDefinition => {
-      if (eventTypeDefinition) return eventTypeDefinition;
+    // eventTypeDefinitionは必須
+    if (!eventTypeDefinition) {
+      console.warn(`Event type definition not found for type: ${event.config.type}`);
+      return null;
+    }
 
-      // デフォルトの定義
-      const defaultDefs: Record<string, EventTypeDefinition> = {
-        "file-operation": {
-          name: "File Operation",
-          icon: "FileText",
-          color: {
-            primary: "#3b82f6",
-            secondary: "#dbeafe",
-            background: "#eff6ff",
-          },
-        },
-        "data-processing": {
-          name: "Data Processing",
-          icon: "Database",
-          color: {
-            primary: "#10b981",
-            secondary: "#d1fae5",
-            background: "#ecfdf5",
-          },
-        },
-        "api-call": {
-          name: "API Call",
-          icon: "Globe",
-          color: {
-            primary: "#f59e0b",
-            secondary: "#fef3c7",
-            background: "#fffbeb",
-          },
-        },
-      };
-
-      return defaultDefs[event.config.type] || defaultDefs["file-operation"];
-    };
-
-    const eventTypeDef = getEventTypeDef();
+    const eventTypeDef = eventTypeDefinition;
 
     const getStatusIcon = () => {
       switch (event.status) {
@@ -97,8 +49,6 @@ export const SimpleEventNode = memo(
     };
 
     const getStatusColor = () => {
-      const baseColors = eventTypeDef.color;
-
       switch (event.status) {
         case "running":
           return `border-blue-400 bg-white shadow-lg shadow-blue-100`;
@@ -109,10 +59,6 @@ export const SimpleEventNode = memo(
         default:
           return `border-gray-300 bg-white shadow-md shadow-gray-100`;
       }
-    };
-
-    const getNodeBackgroundStyle = () => {
-      return { backgroundColor: "#ffffff" };
     };
 
     const getIconBackgroundStyle = () => {
@@ -131,14 +77,19 @@ export const SimpleEventNode = memo(
     };
 
     const getEventIcon = () => {
-      const IconComponent = ICON_MAP[eventTypeDef.icon] || Clock;
-      return <IconComponent className="w-5 h-5" />;
+      try {
+        // 動的にLucideアイコンをインポート
+        const IconComponent = require(`lucide-react`)[eventTypeDef.icon];
+        return IconComponent ? <IconComponent className="w-5 h-5" /> : <Clock className="w-5 h-5" />;
+      } catch {
+        return <Clock className="w-5 h-5" />;
+      }
     };
 
     // ノードスタイルを適用
     const getNodeStyle = () => {
       const baseStyle =
-        "p-4 rounded-xl border-2 flex flex-col justify-between gap-4 min-w-[220px] max-w-[280px] transition-all duration-300";
+        "p-4 rounded-xl border-2 flex flex-col justify-between gap-4 min-w-[220px] max-w-[280px] transition-all duration-300 bg-white";
       const statusStyle =
         event.status === "running"
           ? "ring-2 ring-blue-300 ring-opacity-60 scale-105"
@@ -148,7 +99,7 @@ export const SimpleEventNode = memo(
     };
 
     return (
-      <div className={getNodeStyle()} style={getNodeBackgroundStyle()}>
+      <div className={getNodeStyle()} style={{ backgroundColor: "#ffffff" }}>
         <Handle
           type="target"
           position={Position.Top}

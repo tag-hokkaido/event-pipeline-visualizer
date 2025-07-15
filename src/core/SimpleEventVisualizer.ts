@@ -125,24 +125,16 @@ const DEFAULT_EVENT_TYPES: Record<string, EventTypeDefinition> = {
 
 export class SimpleEventVisualizer {
   private events: Map<string, SimpleEventInstance> = new Map()
-  private config: SimpleVisualizerConfig
   private eventTypeConfig: EventTypeConfig
   private listeners: Array<(events: SimpleEventInstance[]) => void> = []
 
-  constructor(config: SimpleVisualizerConfig = {}) {
-    this.config = {
-      nodeSpacing: { x: 300, y: 200 },
-      pipelineSpacing: 300,
-      showControls: true,
-      showMinimap: true,
-      ...config,
-    }
+  constructor(config: EventTypeConfig) {
 
     // イベントタイプ設定の初期化
     this.eventTypeConfig = {
-      eventTypes: { ...DEFAULT_EVENT_TYPES, ...config.eventTypeConfig?.eventTypes },
-      defaultEventType: config.eventTypeConfig?.defaultEventType || "file-operation",
-      nodeStyles: config.eventTypeConfig?.nodeStyles
+      eventTypes: { ...DEFAULT_EVENT_TYPES, ...config.eventTypes },
+      defaultEventType: config.defaultEventType || "file-operation",
+      nodeStyles: config.nodeStyles
     }
   }
 
